@@ -70,6 +70,7 @@ import { formatCurrency } from '@/lib/utils';
 import AiAnalyticsPanel from './AiAnalyticsPanel';
 import SmartImportModal from './SmartImportModal';
 import PriceTagScanner from './PriceTagScanner';
+import RetailSnapshot from './RetailSnapshot';
 import './smartprice.css';
 
 const KazakhstanMap = dynamic(() => import('./KazakhstanMap'), { ssr: false });
@@ -1460,6 +1461,8 @@ export default function SmartPrice() {
                 onSelectRegion={setRegion}
                 api={api}
               />
+
+              <RetailSnapshot lang={lang} />
 
               <div className="sp-two-col">
                 {rankings(true)}
