@@ -1,122 +1,72 @@
-# 🌙 LunarEC — Polyglot Open-Source CRM & ERP Suite
+# SMART PRICE — Intelligent Food Price Monitoring System
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge" alt="Status" />
-  <a href="https://github.com/BekbolatBolebay/LunarEC/actions">
-    <img src="https://img.shields.io/badge/CI%2FCD-4%20Pipelines%20Passing-brightgreen?style=for-the-badge&logo=github-actions" alt="CI" />
-  </a>
-  <a href="https://github.com/BekbolatBolebay/LunarEC/stargazers">
-    <img src="https://img.shields.io/github/stars/BekbolatBolebay/LunarEC?style=for-the-badge&logo=apachespark&color=gold" alt="Stars" />
-  </a>
-  <a href="https://github.com/BekbolatBolebay/LunarEC/issues">
-    <img src="https://img.shields.io/github/issues/BekbolatBolebay/LunarEC?style=for-the-badge&color=orange" alt="Issues" />
-  </a>
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License" />
-</p>
+## Запуск
+Требуется Node.js 24. Проверено на Node 24.20.0. Встроенная SQLite не требует отдельной установки.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/TypeScript-Next.js%2015-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Rust-Stock%20Engine-DEA584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
-  <img src="https://img.shields.io/badge/Go-POS%20Gateway-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go" />
-  <img src="https://img.shields.io/badge/Python-AI%20Analytics-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-</p>
+```powershell
+npm ci
+npm run test:smartprice
+npm run build
+npm start
+```
 
----
+Адрес: http://localhost:3005. На первом обращении сервер создаёт `data/smartprice.sqlite` и 8 960 тестовых наблюдений за 28 дней: 16 упаковок, 15 групп продуктов, 20 регионов/городов. Повторный запуск сохраняет данные. Не запускайте несколько инстансов с разными локальными дисками.
 
-## 📖 Жоба Туралы (About LunarEC)
+Выберите одну из трёх демо-ролей. Вход намеренно открыт для презентации; это не production-аутентификация. Сервер хранит хеши сессионных токенов, ставит HttpOnly/SameSite cookie и проверяет роль каждого изменения. Переключение ролей создаёт настоящую серверную сессию.
 
-**LunarEC** — бұл **4 түрлі бағдарламалау тілінің (TypeScript, Rust, Go, Python)** ең мықты тұстарын біріктірген, Odoo 17/18 үлгісіндегі заманауи **Polyglot Monorepo** кәсіпорындық CRM & ERP платформасы.
+## Что работает
+- Dashboard из SQLite, график корзины, рост/снижение, список сигналов.
+- Каталог с отдельными SKU для 900 мл и 1 л; расчёт цены за кг, л, штуку.
+- CRUD торговых точек и товаров. Справочники с историей защищены от удаления; параметры товара с ценами защищены от ретроактивного изменения. Точку можно отключить от мониторинга.
+- Ввод и редактирование неподтверждённых собственных наблюдений, поиск, фильтры, история цены.
+- Импорт CSV/XLSX до 1 000 строк, проверка дублей и значений, атомарный откат при ошибке.
+- Объяснимые статистические сигналы, ручная проверка, комментарии, эскалация, заключения и журнал.
+- Фото JPEG/PNG/WebP до 5 МБ: сигнатура файла проверяется, файл сохраняется в SQLite, доступ требует сессии. Автор, время, товар и магазин связаны с наблюдением.
+- Кандидаты сопоставления по группе, названию, бренду, производителю, жирности и упаковке; подтверждение аналитиком. Разные размеры остаются разными SKU.
+- Leaflet, реальная граница Казахстана, выбор регионов и реальные координаты центров городов. Тестовые магазины не имеют выдуманных адресов/GPS. После ввода координат магазин появится маркером.
+- Excel с выбранными фильтрами. PDF через кнопку «Печать / сохранить PDF» и стандартное сохранение браузера. Печатная форма содержит все текущие наблюдения, а не только экранную страницу.
+- Русский, қазақша, English; язык сохраняется в браузере.
+- Четырёхшаговый интерактивный demo-flow через реальные API.
+- Дополнительный CRM/ERP интерфейс сохранён по `/erp`.
 
----
+## Аналитика и ограничения
+Сигнал: изменение от предыдущего наблюдения не менее 15% в любую сторону либо цена выше медианы минимум трёх других магазинов на 30%. Это объяснимый rule-based анализ, не обученная ML-модель и не юридическое заключение. Отклонённые наблюдения исключаются из текущего среза.
 
-## 🧩 4 Тілдік Модульдер Архитектурасы (Polyglot Matrix)
+Корзина: сумма средних нормализованных цен по 15 семействам, по одной базовой единице каждого семейства. Это демонстрационная сравнительная корзина, не официальная норма потребления. Исторический график переносит последние известные наблюдения вперёд. Неполная корзина не получает выдуманного значения. Разные физические единицы нельзя ранжировать как взаимозаменяемые товары.
 
-| Қабат / Модуль | Қолданылған Тіл | Мақсаты және Атқаратын Қызметі |
+OCR, автоматический сбор реальных цен, обученная ML-модель и production SSO не подключены. Нельзя представлять демо-данные как рыночную статистику. Справочник пользователей показывает три демонстрационные учётные записи; административного управления реальными пользователями нет.
+
+Текущий MVP использует один Node.js сервер и постоянный локальный диск. Для промышленного размещения: PostgreSQL/Supabase вместо SQLite, привязка ролей к настоящей учётной записи, объектное хранилище фото, резервные копии, ограничения запросов и пагинация API. `SMARTPRICE_DEMO_LOGIN=false` отключает открытый демо-вход; самостоятельно реальную авторизацию не включает.
+
+## API
+Все GET/POST, кроме демо-входа, требуют серверную сессию.
+
+| Маршрут `/api/smartprice/…` | Метод | Назначение |
 |---|---|---|
-| 🌐 **Frontend & Odoo Shell** | **TypeScript (Next.js 14 + Tailwind)** | Odoo 17 стиліндегі Kanban тақтасы, App Switcher, Chatter және интерактивті UI. |
-| 🦀 **`crates/stock-engine`** | **Rust (Edition 2021)** | Қоймадағы 10 000+ ингредиенттің өзіндік құнын (BOM/COGS) микросекундта есептейтін ультра-жылдам ядро. |
-| 🐹 **`services/pos-gateway`** | **Go (Golang 1.22+)** | Үстелдер мен кассалық оқиғаларды миллисекундта синхрондайтын жеңіл желілік шлюз. |
-| 🐍 **`services/ai-analytics`** | **Python 3.12+** | Мәзір сатылымын болжау (Demand Forecasting) және Odoo JSON-RPC байланысы. |
+| login | POST | `{user_id: monitor / analyst / manager}` — открытый демо-вход |
+| logout | POST | Отзыв сессии |
+| data | GET | Срез товаров, точек, истории цен, сигналов и журнала |
+| prices | POST | product_id, store_id, amount, collected_at ISO, source |
+| price-edit | POST | id, amount; собственная неподтверждённая запись |
+| products / stores | POST | Создание, изменение по id, удаление с delete:true |
+| import-file | POST | multipart file .csv/.xlsx |
+| import | POST | `{rows:[…]}` — атомарная пакетная загрузка |
+| review | POST | id, status verified/rejected/pending, comment; аналитик |
+| comment | POST | id, comment, escalate; специалист/аналитик |
+| evidence | POST | id наблюдения, mime, base64, comment; специалист |
+| evidence/{id} | GET | Фото |
+| detail/{id} | GET | Комментарии и метаданные доказательств |
+| match | POST | id, status confirmed/rejected; аналитик |
+| export | GET | XLSX; region, product, store, from, to, lang |
 
----
-
-## 🏗️ Архитектуралық Диаграмма
-
-```mermaid
-graph TD
-    Client[🌐 LunarEC Next.js UI]
-    
-    subgraph Services [⚡ Polyglot Сервистер]
-        RustCore[🦀 Rust: Food Costing & Stock Engine]
-        GoPOS[🐹 Go: Real-Time Table & POS Gateway]
-        PyAI[🐍 Python: AI Demand Forecasting]
-    end
-
-    subgraph Data [🗄️ Дерекқор және Odoo]
-        Supabase[(PostgreSQL / Supabase)]
-        OdooERP[(Odoo ERP JSON-RPC 2.0)]
-    end
-
-    Client --> RustCore
-    Client --> GoPOS
-    Client --> PyAI
-    RustCore --> Supabase
-    PyAI --> OdooERP
+Шаблон импорта:
+```csv
+product_id,store_id,amount,collected_at,source
+oil,store-0,1100,2026-11-13T10:00:00.000Z,manual
 ```
+Не импортируйте строку с датой позже текущего времени. Для просмотра ID продуктов используйте диалог импорта или API data.
 
----
+## Сохранённая архитектура
+См. `docs/smartprice/ARCHITECTURE.md` и сценарий `docs/smartprice/PITCH.md`.
 
-## 🚀 Бір Командамен Барлық 4 Тілді Тексеру (Polyglot Test)
 
-Барлық 4 тілдің (TypeScript, Rust, Python, Go) кодтарын жинап, unit-тестілерін бірден өткізу үшін:
-
-```bash
-npm run test:polyglot
-```
-
-**Нәтижесінде:**
-* 🌐 `Next.js 14` ➔ Compiled successfully
-* 🦀 `Rust cargo test` ➔ 2 passed, 0 failed (0.00s)
-* 🐍 `Python unittest` ➔ 3 passed (0.000s)
-* 🐹 `Go test` ➔ PASS (0.002s)
-
----
-
-## 📂 Жоба Каталогы
-
-```
-LunarEC/
-├── .github/workflows/ci.yml       ← 4 тілді қатар тексеретін GitHub Actions
-├── app/                           ← TypeScript / Next.js веб қолданбасы
-├── components/odoo/               ← Odoo стильдегі UI компоненттері
-├── crates/
-│   └── stock-engine/              ← 🦀 RUST: Қойма мен калькуляция ядросы
-│       ├── Cargo.toml
-│       └── src/main.rs
-├── services/
-│   ├── pos-gateway/               ← 🐹 GO: Желілік POS шлюзі
-│   │   ├── go.mod
-│   │   ├── main.go
-│   │   └── main_test.go
-│   └── ai-analytics/              ← 🐍 PYTHON: AI сұранысты болжау
-│       ├── analytics.py
-│       └── test_analytics.py
-├── CRM/                           ← SQL схемалар және CRM API
-├── ERP/                           ← Рецептура және Odoo интеграциясы
-├── package.json
-└── LICENSE                        ← MIT License
-```
-
----
-
-## 📄 Лицензия
-
-MIT License © 2026 LunarNT Team.
-Барлық әзірлеушілер мен қауымдастық мүшелері өз үлесін қоса алады! 🚀
-
-### 🚀 Architecture Overview
-LunarEC uses an event-driven polyglot architecture:
-- Next.js Web Dashboard
-- Rust In-Memory FIFO/LIFO Engine
-- Go POS WebSocket Stream
-- Python Predictive Analytics
