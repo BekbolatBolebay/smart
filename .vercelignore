@@ -1,0 +1,8 @@
+crates/
+services/
+CRM/
+ERP/
+packages/
+docs/
+.metrics/
+data/
