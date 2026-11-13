@@ -1,5 +1,5 @@
 {
-  "name": "lunarec",
+  "name": "smart-price",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -11,15 +11,19 @@
     "test:go": "cd services/pos-gateway && go test ./...",
     "test:python": "python3 -m unittest discover -s services/ai-analytics",
     "test:all": "npm run test:rust && npm run test:go && npm run test:python && npm run build",
-    "test:polyglot": "npm run test:all"
+    "test:polyglot": "npm run test:all",
+    "test:smartprice": "node --test scripts/smartprice/*.test.cjs",
+    "typecheck:smartprice": "tsc --noEmit -p tsconfig.smartprice.json"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "clsx": "^2.1.1",
+    "exceljs": "^4.4.0",
     "framer-motion": "^11.5.4",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
-    "next": "14.2.13",
+    "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.7",
@@ -27,6 +31,7 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^20.16.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
@@ -34,5 +39,8 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

@@ -1,0 +1,5 @@
+{
+ "extends":"./tsconfig.json",
+ "include":["components/smartprice/**/*.tsx","lib/smartprice/**/*.ts","app/api/smartprice/**/*.ts","app/page.tsx"],
+ "exclude":["node_modules"]
+}
