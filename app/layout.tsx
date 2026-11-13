@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'SMART PRICE — Intelligent Food Price Monitoring',
-  description: 'Мониторинг цен на продукты в Казахстане. Hackathon 2026 · LunarEC',
+  description: 'Мониторинг цен на продукты в Казахстане. GOVTECH Hackathon 2026 · SMART PRICE',
 };
 
 export default function RootLayout({
@@ -24,3 +24,4 @@ export default function RootLayout({
     </html>
   );
 }
+
