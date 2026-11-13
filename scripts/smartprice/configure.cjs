@@ -1,0 +1,1 @@
+const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.scripts['test:smartprice']='node --test scripts/smartprice/*.test.cjs';p.scripts['typecheck:smartprice']='tsc --noEmit -p tsconfig.smartprice.json';p.engines={node:'>=24.0.0'};fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');
