@@ -1,39 +1,19 @@
-# SMART PRICE — архитектура
+# SMART PRICE — Архитектура (GovTech Hackathon 2026 · Кейс №3)
 
 ## Стек
-Next.js 14 App Router, React 18, TypeScript, Recharts, Lucide, Sonner, Leaflet и серверная SQLite. Требуется Node.js 24.
+Next.js 14 App Router, React 18, TypeScript, Recharts, Lucide, Sonner, Leaflet, SQLite (`node:sqlite` на Node 24 / `better-sqlite3` на Node 20), Tesseract.js (`kaz+rus+eng`) и серверный AI Gateway (`alem.ai · qwen3-8` / OpenAI-compatible / Gemini).
 
 ## Модули
-- `components/smartprice`: dashboard, каталог, карта, мониторинг, проверка, отчёты и формы.
-- `lib/smartprice/engine.cjs`: SQL-хранилище, бизнес-правила, валидация, сессии, роли, аудит, сопоставление и CSV parser.
-- `lib/smartprice/metrics.ts`: текущий срез и историческая корзина.
-- `lib/smartprice/i18n.ts`: русский, қазақша, English.
-- `app/api/smartprice/[...path]/route.ts`: реальные HTTP-маршруты и XLSX.
-- `scripts/smartprice`: тесты и проверка внешнего API.
-- `app/erp`: дополнительный CRM/ERP интерфейс.
+- `components/smartprice/SmartPrice.tsx`: интерфейс на 3 языках (`kk`, `ru`, `en`), роли, дашборд, карта, мониторинг, верификация, история, отчёты, настройки AI.
+- `components/smartprice/AiAnalyticsPanel.tsx`: региональное и периодное сравнение **Min / Медиана / Max**, радар шринкфляции (`900 г / 450 ₸ = 500 ₸/кг`), AI Executive Brief и grounded AI Copilot.
+- `components/smartprice/PriceTagScanner.tsx`: загрузка фото ценника/чека (или генерация тестового PNG) → Tesseract OCR → LLM-нормализация и сопоставление SKU с подтверждением специалиста.
+- `components/smartprice/SmartImportModal.tsx`: предпросмотр CSV/XLSX и AI-парсинг неструктурированных строк с проверкой ошибок и дубликатов до записи в БД.
+- `lib/smartprice/engine.cjs`: SQLite WAL-хранилище, бизнес-правила, MAD Z-Score, транзакционный аудит, сессии и предвалидация импорта.
+- `lib/smartprice/ml.ts` / `metrics-core.mjs`: корзина, 7-дневный прогноз Holt Double Exponential Smoothing, Min/Median/Max по регионам/периодам и детектор шринкфляции.
+- `lib/smartprice/ai.cjs`: серверный AI-шлюз (`alem.ai` `qwen3-8`, Gemini, OpenAI-compatible) с честным статистическим fallback.
+- `app/api/smartprice/[...path]/route.ts`: аутентифицированные HTTP-маршруты, 2-листовой XLSX-экспорт (Наблюдения + Min/Median/Max), OCR, AI-объяснения, Copilot.
 
-## Поток данных
-UI → серверная сессия → проверка роли → валидация → анализ → SQL INSERT и audit в одной транзакции → обновление dashboard.
-
-Аналитик сохраняет заключение, решение и комментарий одной транзакцией. Фото привязано к наблюдению, которое определяет товар, магазин и автора. Исходное наблюдение не подменяется результатом OCR.
-
-## База
-Таблицы products, stores, prices, users, sessions, comments, evidence, audit, matches и settings. Внешние ключи, уникальность времени наблюдения, WAL и атомарный импорт. Фото хранится BLOB. Отклонённые наблюдения исключаются из текущего среза. Подтверждённые записи защищены от редактирования специалистом.
-
-## Аналитика
-Сигнал: изменение минимум 15% либо превышение медианы минимум трёх других магазинов на 30%. Это объяснимые статистические правила, не обученная нейросеть. Сопоставление оценивает группу, название, бренд, производителя, жирность и упаковку; объём не объединяет исходные SKU. Требуется ручное подтверждение.
-
-## Геоданные
-Граница Казахстана: Natural Earth, https://github.com/johan/world.geo.json/blob/master/countries/KAZ.geo.json. Подложка CARTO / OpenStreetMap требует интернета. Центры городов служат выбору региона, а не имитируют расположение магазинов. Полигоны отдельных областей пока не включены.
-
-## Размещение
-Один Node.js 24 сервер с постоянным диском. Включён Dockerfile.smartprice. База сохраняется в data/smartprice.sqlite; для промышленного multi-server размещения потребуется PostgreSQL/Supabase и настоящее SSO. Открытый демо-вход не является production-аутентификацией. Временная HTTPS-ссылка зависит от запущенного сервера и туннеля.
-
-## Проверка
-`npm run test:smartprice` — 13 тестов правил, ролей, транзакций, сессий, сохранения SQLite, сопоставления, CSV и корзины.
-`npm run typecheck:smartprice` — проверка нового модуля.
-`npm run build` — production-сборка.
-`node scripts/smartprice/integration.cjs <URL>` — вход, cookies, роли, цены, дубли, CSV/XLSX import/export, фото и аудит через HTTP. Создаёт тестовые записи.
-
-## Границы MVP
-Нет реальных источников цен, OCR и обученной ML-модели. Данные тестовые. PDF — печатная форма с сохранением через браузер. Дополнительные исторические ERP-модули не входят в проверенный путь мониторинга.
+## Принцип Human-in-the-Loop и соответствие Кейсу №3
+1. AI и статистические правила (`±15%`, `+30% к медиане`, `MAD Z-Score ≥ 3.5`) формируют **сигналы для проверки**, а не юридическое заключение о нарушении.
+2. Все числа передаются в LLM строго из SQLite/ML-слоя, чтобы исключить галлюцинации.
+3. Все секреты AI API хранятся на сервере (`.env.local` или серверная таблица `settings`) и никогда не возвращаются в браузер.
