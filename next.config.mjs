@@ -8,7 +8,7 @@ const nextConfig = {
     return config;
   },
   experimental: {
-    serverComponentsExternalPackages: ['better-sqlite3', 'tesseract.js'],
+    serverComponentsExternalPackages: ['tesseract.js'],
     outputFileTracingIncludes: {
       '/api/smartprice/**': [
         './node_modules/tesseract.js-core/**/*.wasm',
